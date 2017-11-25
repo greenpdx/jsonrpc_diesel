@@ -1,0 +1,13 @@
+[package]
+name = "jrpc"
+version = "0.1.0"
+authors = ["SavageS <savages@savages.com>"]
+
+[dependencies]
+jsonrpc-core = { git = "https://github.com/paritytech/jsonrpc" }
+jsonrpc-minihttp-server = { git = "https://github.com/paritytech/jsonrpc" }
+jsonrpc-http-server = { git = "https://github.com/paritytech/jsonrpc" }
+diesel = { version = "0.16.0", features = ["postgres","serde_json"] }
+diesel_codegen = { version = "0.16.0", features = ["postgres"] }
+dotenv = "0.9.0"
+serde_json = "1.0"

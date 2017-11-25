@@ -1,0 +1,6 @@
+-- Your SQL goes here
+CREATE TABLE tst1 (
+  id SERIAL PRIMARY KEY,
+  ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  js json NOT NULL
+)
