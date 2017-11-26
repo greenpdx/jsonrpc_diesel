@@ -2,7 +2,10 @@ extern crate jsonrpc_core;
 extern crate jsonrpc_http_server;
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_codegen;
-
+#[macro_use] extern crate serde_derive;
+#[macro_use] extern crate serde_json;
+extern crate serde;
+// #[macro_use] extern crate derive_builder;
 extern crate dotenv;
 
 pub mod schema;
@@ -24,7 +27,8 @@ use std::env;
 use std::fmt;
 use std::fmt::Formatter;
 use diesel::pg::types::sql_types::*;
-
+use diesel::types::Timestamp;
+//use serde_json::builder;
 
 pub fn establish_connection() -> PgConnection {
     dotenv().ok();
@@ -75,7 +79,7 @@ impl Middleware<Meta> for MyMiddleware {
 	{
 		let start = Instant::now();
 		let request_number = self.0.fetch_add(1, atomic::Ordering::SeqCst);
-		println!("Processing request {}: {:?}, {:?}", request_number, request, meta);
+		//println!("Processing request {}: {:?}, {:?}", request_number, request, meta);
 
 		Box::new(next(request, meta).map(move |res| {
 			println!("Processing took: {:?}", start.elapsed());
@@ -84,41 +88,56 @@ impl Middleware<Meta> for MyMiddleware {
 	}
 }
 
-struct NewTst1 {
-    js: Value,
-}
-
-
-fn create_tst<'a>(conn: &PgConnection, justj: Value) -> models::Tst1 {
+fn create_tst<'a>(conn: &PgConnection, cmd: String, rpcid: i32)  {
     use self::schema::tst1;
-    let new_tst = &NewTst1 {
-        js: justj,
+    let new_tst = &models::NewTst {
+        methd: cmd,
+        rpcid: rpcid,
     };
-    let tst: models::Tst1 = diesel::insert(new_tst).into(tst1::table)
-        .get_result(conn)
+//    let tst: models::Tst1 = diesel::insert_into(tst1::table)
+//        .values(cmd)
+//        .get_results(conn)
+//        .expect("Error");
+    let tst = diesel::insert(new_tst)
+        .into(tst1::table)
+        .execute(conn)
         .expect("Error");
-    tst
+
+//    tst
 }
 
-fn methd_pg(params: Params, meta: Meta) -> Result<Value> {
+fn methd_ins(params: Params, meta: Meta) -> Result<Value> {
 
     let conn = establish_connection();
     let js: [i32;2] = params.parse().unwrap();
-    let justj = serde_json::from_str(r#"{"jsonrpc": "2.0", "method": "say_hello", "params": [42, 23], "id": 1}"#);
-    let rslt = create_tst(&conn, justj.unwrap());
+    println!("INS {:?} {:?}", js, meta);
+    let rslt = create_tst(&conn, "say_ins".to_string(), 1);
     Ok(Value::String(format!("{:?} {:?}", js, meta)))
 }
 
 
-//struct Methd(AtomicUsize);
-//impl RpcMethod<Meta> for Methd {
-//    fn call(&self, params: Params, meta: Meta) -> BoxFuture<Value> {
-//    }
-//}
-struct bye {
-
+fn methd_qry(params: Params, meta: Meta) -> Result<Value> {
+    use self::schema::tst1::dsl::*;
+    use models::Tst1;
+    use serde::Serialize;
+    let conn = establish_connection();
+    let rslt = tst1.filter(id.ne(0))
+        .load::<Tst1>(&conn)
+        .expect("Error");
+    let r = json!(&rslt);
+//    println!("{:?}", r);
+    for itm in rslt {
+        let s = serde_json::to_string(&itm).unwrap();
+        println!("{} {} {}", itm.id, s, itm);
+    }
+    Ok(Value::String(format!("{}", &r)))
 }
+
 fn methd_bye(params: Params, meta: Meta) -> Result<Value> {
+    let js: [i32;2] = params.parse().unwrap();
+    Ok(Value::String(format!("{:?}", js)))
+}
+fn methd_more(params: Params, meta: Meta) -> Result<Value> {
     let js: [i32;2] = params.parse().unwrap();
     Ok(Value::String(format!("{:?} {:?}", js, meta)))
 }
@@ -141,7 +160,9 @@ fn main() {
 
     io.add_method_with_meta("say_hello", &methd_hello);
     io.add_method_with_meta("say_bye", &methd_bye);
-    io.add_method_with_meta("say_pg", &methd_pg);
+    io.add_method_with_meta("say_ins", &methd_ins);
+    io.add_method_with_meta("say_qry", &methd_qry);
+    io.add_method_with_meta("say_more", &methd_more);
 
     let _server = ServerBuilder::new(io)
 //        .threads(3)
@@ -151,7 +172,7 @@ fn main() {
             let uri = req.uri().clone();
             let hdrs = req.headers().clone();
             let remote = req.remote_addr().clone();
-            println!("{:?}", req);
+            //println!("{:?}", req);
 //            let auth = Some(req.headers()
 //                .get::<header::Host>().unwrap().hostname().to_string());
 //            let auth = auth.map(|h| h.token.clone());
