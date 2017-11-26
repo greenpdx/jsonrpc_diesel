@@ -7,13 +7,22 @@ authors = ["SavageS <savages@savages.com>"]
 jsonrpc-core = { git = "https://github.com/paritytech/jsonrpc" }
 jsonrpc-minihttp-server = { git = "https://github.com/paritytech/jsonrpc" }
 jsonrpc-http-server = { git = "https://github.com/paritytech/jsonrpc" }
-diesel = { git = "https://github.com/diesel-rs/diesel", features = ["postgres","serde_json","chrono"] }
-diesel_codegen = { version = "0.16.0", features = ["postgres"] }
 dotenv = "0.9.0"
 serde_json = "1.0"
 chrono =  { version = "0.4.0", features = ["serde"] }
-r2d2 = "0.7.4"
-r2d2-diesel = "0.16.0"
 serde_derive = "1.0.21"
 serde = "1.0.21"
-# derive_builder = "0.5.0"
+slog = "~2.0.12"
+slog-term = "~2.3.0"
+slog-json = "~2.0.2"
+r2d2 = "0.7.4"
+
+diesel = { version = "0.16.0", features = ["postgres","serde_json","chrono"] }
+diesel_infer_schema = { version = "0.16.0", features = ["postgres"] }
+diesel_codegen = {  version = "0.16.0", features = ["postgres"] }
+r2d2-diesel = { version = "0.16.0" }
+
+#diesel = { git = "https://github.com/diesel-rs/diesel", features = ["postgres","serde_json","chrono"] }
+#diesel_infer_schema = { git = "https://github.com/diesel-rs/diesel", features = ["postgres"] }
+#diesel_codegen = {  git = "https://github.com/diesel-rs/diesel", features = ["postgres"] }
+#r2d2-diesel = { get = "https://github.com/diesel-rs/r2d2-diesel"}

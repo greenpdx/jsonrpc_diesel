@@ -2,15 +2,23 @@ extern crate jsonrpc_core;
 extern crate jsonrpc_http_server;
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_codegen;
+// #[macro_use] extern crate diesel_infer_schema;
 #[macro_use] extern crate serde_derive;
 #[macro_use] extern crate serde_json;
 extern crate serde;
 // #[macro_use] extern crate derive_builder;
 extern crate dotenv;
+extern crate r2d2;
+extern crate r2d2_diesel;
+#[macro_use] extern crate slog;
+extern crate slog_term;
+extern crate slog_json;
 
 pub mod schema;
 pub mod models;
+mod utils;
 
+use std::thread;
 use jsonrpc_core::*;
 use jsonrpc_http_server::{ServerBuilder, DomainsValidation, AccessControlAllowOrigin, RestApi, MetaExtractor, hyper};
 use self::hyper::{Method, Uri, HttpVersion, Headers, Body, header};
@@ -29,39 +37,45 @@ use std::fmt::Formatter;
 use diesel::pg::types::sql_types::*;
 use diesel::types::Timestamp;
 //use serde_json::builder;
+use r2d2_diesel::ConnectionManager;
+use slog::Logger;
+use utils::logger_factory;
 
-pub fn establish_connection() -> PgConnection {
-    dotenv().ok();
+pub type DieselPool = r2d2::Pool<ConnectionManager<PgConnection>>;
+pub type DieselConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;
 
-    let database_url = env::var("DATABASE_URL")
-        .expect("DATABASE_URL must be set");
-    PgConnection::establish(&database_url)
-        .expect(&format!("Error connecting to {}", database_url))
+#[derive(Clone, Default)]
+pub struct DieselMidWare {
+    pool: Option<DieselPool>
+}
+impl DieselMidWare {
+	pub fn new (logger: &Logger) -> DieselMidWare{
+		let logger = logger.new(o!("module" => "DieselMidWare"));
+
+		let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+
+		let config = r2d2::Config::default();
+		let manager = ConnectionManager::<PgConnection>::new(database_url);
+		let pool = r2d2::Pool::new(config, manager).expect("Failed to create diesel pool.");
+
+		info!(logger, "Diesel pool created");
+
+		DieselMidWare {pool: Some(pool)}
+	}
 }
 
-
-#[derive(Clone)]
+#[derive(Clone, Default)]
 struct Meta {
     remote: Option<SocketAddr>,
 //    bob: (Method, Uri, HttpVersion, Headers, Body),
     methd: Method,
     uri: Uri,
     hdrs: Headers,
-//    pgconn: Option<PgConnection>,
+    dbpool: DieselMidWare,
 //    path: String,
 }
 impl Metadata for Meta {}
-impl Default for Meta {
-    fn default() -> Meta {
-        Meta {
-            remote: Option::default(),
-            methd: Method::default(),
-            uri: Uri::default(),
-            hdrs: Headers::default(),
-//            pgconn: None,
-        }
-    }
-}
+
 impl fmt::Debug for Meta {
     fn fmt(&self,f: &mut Formatter) -> fmt::Result {
         let pgstr = "PG".to_string();
@@ -107,12 +121,13 @@ fn create_tst<'a>(conn: &PgConnection, cmd: String, rpcid: i32)  {
 }
 
 fn methd_ins(params: Params, meta: Meta) -> Result<Value> {
+    let pool = meta.dbpool;
+    let conn = pool.pool.unwrap().get().unwrap();
 
-    let conn = establish_connection();
     let js: [i32;2] = params.parse().unwrap();
-    println!("INS {:?} {:?}", js, meta);
-    let rslt = create_tst(&conn, "say_ins".to_string(), 1);
-    Ok(Value::String(format!("{:?} {:?}", js, meta)))
+//    println!("INS {:?} {:?}", js, meta);
+    let rslt = create_tst(&*conn, "say_ins".to_string(), 1);
+    Ok(Value::String(format!("{:?}", js)))
 }
 
 
@@ -120,9 +135,11 @@ fn methd_qry(params: Params, meta: Meta) -> Result<Value> {
     use self::schema::tst1::dsl::*;
     use models::Tst1;
     use serde::Serialize;
-    let conn = establish_connection();
+    let pool = meta.dbpool;
+    let conn = pool.pool.unwrap().get().unwrap();
+
     let rslt = tst1.filter(id.ne(0))
-        .load::<Tst1>(&conn)
+        .load::<Tst1>(&*conn)
         .expect("Error");
     let r = json!(&rslt);
 //    println!("{:?}", r);
@@ -153,8 +170,8 @@ fn methd_hello(_parm: Params, meta: Meta) -> Result<Value> {
 
 
 fn main() {
-
-    let dbconn = establish_connection();
+    let logger = logger_factory();
+    let thepool = DieselMidWare::new(&logger);
 
     let mut io = MetaIoHandler::with_middleware(MyMiddleware::default());
 
@@ -172,11 +189,9 @@ fn main() {
             let uri = req.uri().clone();
             let hdrs = req.headers().clone();
             let remote = req.remote_addr().clone();
-            //println!("{:?}", req);
-//            let auth = Some(req.headers()
-//                .get::<header::Host>().unwrap().hostname().to_string());
-//            let auth = auth.map(|h| h.token.clone());
-            Meta { methd, uri, hdrs, remote }
+            let dbpool = thepool.clone();
+
+            Meta { methd, uri, hdrs, remote, dbpool: dbpool }
         })
         .cors(DomainsValidation::AllowOnly(vec![AccessControlAllowOrigin::Any]))
         .start_http(&"0.0.0.0:3030".parse().unwrap())
