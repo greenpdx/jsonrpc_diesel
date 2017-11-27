@@ -16,7 +16,7 @@ pub fn logger_factory() -> Logger {
 
 			Logger::root(
 				json,
-				o!("app" => "templic-backend")
+				o!("app" => "jrpc")
 			)
 		},
 		_ => {
@@ -25,7 +25,7 @@ pub fn logger_factory() -> Logger {
 
 			Logger::root(
 				drain,
-				o!("app" => "templic-backend")
+				o!("app" => "jrpc")
 			)
 		}
 	}

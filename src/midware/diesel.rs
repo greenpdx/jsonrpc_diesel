@@ -1,4 +1,3 @@
-use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use r2d2;
 use r2d2_diesel::ConnectionManager;
@@ -8,7 +7,6 @@ use std::env;
 use std::sync::atomic::{self, AtomicUsize};
 use jsonrpc_core::*;
 use jsonrpc_core::futures::Future;
-use jsonrpc_http_server::{ServerBuilder, DomainsValidation, AccessControlAllowOrigin, RestApi, MetaExtractor, hyper};
 use meta::Meta;
 use std::time::Instant;
 
@@ -57,7 +55,7 @@ impl Middleware<Meta> for MyMiddleware {
 
 		Box::new(next(request, meta).map(move |res| {
 
-            info!(logger, "Processing took: {:?}", start.elapsed());
+            info!(logger, "{} Processing took: {:?}", request_number, start.elapsed());
 			println!("Processing took: {:?}", start.elapsed());
 			res
 		}))

@@ -4,9 +4,9 @@ extern crate jsonrpc_http_server;
 use std::fmt;
 use std::fmt::Formatter;
 use jsonrpc_core::*;
-use std::net::{SocketAddr, IpAddr};
-use jsonrpc_http_server::{ServerBuilder, DomainsValidation, AccessControlAllowOrigin, RestApi, MetaExtractor, hyper};
-use self::hyper::{Method, Uri, HttpVersion, Headers, Body, header};
+use std::net::{SocketAddr};
+use jsonrpc_http_server::{hyper};
+use self::hyper::{Method, Uri, Headers};
 use slog::Logger;
 use midware::diesel::DieselMidWare;
 
