@@ -23,7 +23,6 @@ pub mod midware;
 
 use jsonrpc_core::*;
 use jsonrpc_http_server::{ServerBuilder, DomainsValidation, AccessControlAllowOrigin, RestApi, hyper};
-use self::hyper::{Method, Uri, HttpVersion, Headers, Body, header};
 use midware::diesel::{DieselMidWare, MyMiddleware};
 use utils::logger_factory;
 use api::add_api;

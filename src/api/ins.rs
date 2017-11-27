@@ -16,7 +16,7 @@ fn create_tst<'a>(conn: &PgConnection, cmd: String, rpcid: i32)  {
 //        .values(cmd)
 //        .get_results(conn)
 //        .expect("Error");
-    let tst = diesel::insert(new_tst)
+    let _tst = diesel::insert(new_tst)
         .into(tst1::table)
         .execute(conn)
         .expect("Error");
@@ -30,6 +30,6 @@ pub fn methd_ins(params: Params, meta: Meta) -> Result<Value> {
 
     let js: [i32;2] = params.parse().unwrap();
 //    println!("INS {:?} {:?}", js, meta);
-    let rslt = create_tst(&*conn, "say_ins".to_string(), 1);
+    let _rslt = create_tst(&*conn, "say_ins".to_string(), 1);
     Ok(Value::String(format!("{:?}", js)))
 }

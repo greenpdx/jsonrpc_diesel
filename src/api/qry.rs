@@ -1,14 +1,11 @@
 use jsonrpc_core::*;
 use meta::Meta;
-use diesel::pg::PgConnection;
-use diesel;
 use schema;
 use diesel::prelude::*;
 
-pub fn methd_qry(params: Params, meta: Meta) -> Result<Value> {
+pub fn methd_qry(_params: Params, meta: Meta) -> Result<Value> {
     use self::schema::tst1::dsl::*;
     use models::Tst1;
-    use serde::Serialize;
     let pool = meta.dbpool;
     let conn = pool.unwrap().pool.get().unwrap();
 

@@ -56,7 +56,7 @@ impl Middleware<Meta> for MyMiddleware {
 		Box::new(next(request, meta).map(move |res| {
 
             info!(logger, "{} Processing took: {:?}", request_number, start.elapsed());
-			println!("Processing took: {:?}", start.elapsed());
+			//println!("Processing took: {:?}", start.elapsed());
 			res
 		}))
 	}
