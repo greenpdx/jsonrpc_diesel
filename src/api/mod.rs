@@ -1,0 +1,22 @@
+pub mod hello;
+pub mod bye;
+pub mod ins;
+pub mod qry;
+pub mod more;
+
+use jsonrpc_core::*;
+use api::hello::methd_hello;
+use api::bye::methd_bye;
+use api::ins::methd_ins;
+use api::qry::methd_qry;
+use api::more::methd_more;
+use meta::Meta;
+use midware::diesel::MyMiddleware;
+
+pub fn add_api(io: &mut MetaIoHandler<Meta, MyMiddleware>) {
+    io.add_method_with_meta("say_hello", &methd_hello);
+    io.add_method_with_meta("say_bye", &methd_bye);
+    io.add_method_with_meta("say_ins", &methd_ins);
+    io.add_method_with_meta("say_qry", &methd_qry);
+    io.add_method_with_meta("say_more", &methd_more);
+}

@@ -1,7 +1,3 @@
-//#[macro_use] extern crate slog;
-//extern crate slog_term;
-//extern crate slog_json;
-
 use std::io::stdout;
 use std::env;
 use std::sync::Mutex;
