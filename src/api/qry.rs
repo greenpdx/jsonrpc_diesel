@@ -14,9 +14,9 @@ pub fn methd_qry(_params: Params, meta: Meta) -> Result<Value> {
         .expect("Error");
     let r = json!(&rslt);
 //    println!("{:?}", r);
-    for itm in rslt {
-        let s = serde_json::to_string(&itm).unwrap();
-        println!("{} {} {}", itm.id, s, itm);
-    }
+//    for itm in rslt {
+//        let s = serde_json::to_string(&itm).unwrap();
+//        println!("{} {} {}", itm.id, s, itm);
+//    }
     Ok(Value::String(format!("{}", &r)))
 }
