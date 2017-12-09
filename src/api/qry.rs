@@ -4,13 +4,13 @@ use schema;
 use diesel::prelude::*;
 
 pub fn methd_qry(_params: Params, meta: Meta) -> Result<Value> {
-    use self::schema::tst1::dsl::*;
-    use models::Tst1;
+    use self::schema::vids0::dsl::*;
+    use models::Vid;
     let pool = meta.dbpool;
     let conn = pool.unwrap().pool.get().unwrap();
 
-    let rslt = tst1.filter(id.ne(0))
-        .load::<Tst1>(&*conn)
+    let rslt = vids0.filter(id.ne(0))
+        .load::<Vid>(&*conn)
         .expect("Error");
     let r = json!(&rslt);
 //    println!("{:?}", r);

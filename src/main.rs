@@ -1,3 +1,5 @@
+#![recursion_limit="128"]
+
 extern crate jsonrpc_core;
 extern crate jsonrpc_http_server;
 #[macro_use] extern crate diesel;
