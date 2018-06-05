@@ -8,7 +8,7 @@ use std::net::{SocketAddr};
 use jsonrpc_http_server::{hyper};
 use self::hyper::{Method, Uri, Headers};
 use slog::Logger;
-use midware::diesel::DieselMidWare;
+use theapp::DieselMidWare;
 
 #[derive(Clone,Default)]
 pub struct Meta {

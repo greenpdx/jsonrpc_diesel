@@ -22,10 +22,12 @@ mod utils;
 mod api;
 pub mod meta;
 pub mod midware;
+pub mod theapp;
 
 use jsonrpc_core::*;
 use jsonrpc_http_server::{ServerBuilder, DomainsValidation, AccessControlAllowOrigin, RestApi, hyper};
-use midware::diesel::{DieselMidWare, MyMiddleware};
+use midware::diesel::{MyMiddleware};
+use theapp::DieselMidWare;
 use utils::logger_factory;
 use api::add_api;
 use meta::Meta;
