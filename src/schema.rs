@@ -1,21 +1,25 @@
-infer_schema!("dotenv:DATABASE_URL");
-
 table! {
-    vidfull {
-        id -> Integer,
-        name -> VarChar,
-        len -> BigInt,
-        duration -> Float,
-        bit_rate -> Integer,
-        width -> Nullable<SmallInt>,
-        height -> Nullable<SmallInt>,
-        access -> Nullable<Timestamp>,
-        modify -> Nullable<Timestamp>,
-        viewed -> Nullable<Integer>,
-        rate -> Nullable<SmallInt>,
-        quality -> Nullable<SmallInt>,
-        accumtime -> Nullable<Integer>,
-        fpath -> Nullable<VarChar>,
-        hash -> Nullable<VarChar>,
+    item (id) {
+        id -> Nullable<Integer>,
+        name -> Text,
+        price -> Integer,
+        desc -> Nullable<Text>,
+        valid -> Integer,
     }
 }
+
+table! {
+    sell (id) {
+        id -> Nullable<Integer>,
+        item_id -> Integer,
+        tz -> BigInt,
+        sold -> Nullable<Integer>,
+    }
+}
+
+joinable!(sell -> item (item_id));
+
+//allow_tables_to_appear_in_same_query!(
+//    item,
+//    sell,
+//);

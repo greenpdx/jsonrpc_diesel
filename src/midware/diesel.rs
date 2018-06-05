@@ -1,4 +1,5 @@
-use diesel::pg::PgConnection;
+//use diesel::pg::PgConnection;
+use diesel::sqlite::SqliteConnection;
 use r2d2;
 use r2d2_diesel::ConnectionManager;
 use slog::Logger;
@@ -10,8 +11,8 @@ use jsonrpc_core::futures::Future;
 use meta::Meta;
 use std::time::Instant;
 
-pub type DieselPool = r2d2::Pool<ConnectionManager<PgConnection>>;
-pub type DieselConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;
+pub type DieselPool = r2d2::Pool<ConnectionManager<SqliteConnection>>;
+pub type DieselConnection = r2d2::PooledConnection<ConnectionManager<SqliteConnection>>;
 
 #[derive(Clone)]
 pub struct DieselMidWare {
@@ -25,7 +26,7 @@ impl DieselMidWare {
 		let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
 		let config = r2d2::Config::default();
-		let manager = ConnectionManager::<PgConnection>::new(database_url);
+		let manager = ConnectionManager::<SqliteConnection>::new(database_url);
 		let pool = r2d2::Pool::new(config, manager).expect("Failed to create diesel pool.");
 
 		info!(logger, "Diesel pool created");

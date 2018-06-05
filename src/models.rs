@@ -2,65 +2,42 @@ extern crate chrono;
 extern crate serde_json;
 extern crate serde;
 
-use schema::{vids0, vidsinfo0};
+use schema::{item, sell};
 use self::chrono::NaiveDateTime;
 use std::fmt;
+use self::chrono::*;
 
 #[derive(Insertable,Debug,Default)]
-#[table_name="vids0"]
-pub struct NewVid {
+#[table_name="item"]
+pub struct NewItem {
     pub name: String,
-    pub len: i64,
-    pub duration: f32,
-    pub bit_rate: i32,
-    pub width: i16,
-    pub height: i16,
+    pub price: i32,
+    pub desc: Option<String>,
+    pub valid: i32,
 }
 
 #[derive(Queryable,Serialize, Debug)]
-pub struct Vid {
+pub struct Item {
     pub id: i32,
     pub name: String,
-    pub len: i64,
-    pub duration: f32,
-    pub bit_rate: i32,
-    pub width: Option<i16>,
-    pub height: Option<i16>,
-
+    pub price: i32,
+    pub desc: Option<String>,
+    pub valid: i32
 }
 
-#[derive(Insertable,Queryable,Serialize,Debug)]
-#[table_name="vidsinfo0"]
-pub struct VidInfo {
-    pub id: i32,
-    pub access: Option<NaiveDateTime>,
-    pub modify: Option<NaiveDateTime>,
-    pub viewed: Option<i32>,
-    pub rate: Option<i16>,
-    pub quality: Option<i16>,
-    pub accumtime: Option<i32>,
-    pub fpath: Option<String>,
-    pub hash: Option<String>,
+#[derive(Insertable,Serialize,Debug)]
+#[table_name="sell"]
+pub struct NewSell {
+    pub item_id: i32,
+    pub sold: i32
 }
 
 #[derive(Queryable,Serialize, Debug)]
-pub struct VidFull {
-    pub id: i32,
-    pub name: String,
-    pub len: i64,
-    pub duration: f32,
-    pub bit_rate: i32,
-    pub width: Option<i16>,
-    pub height: Option<i16>,
-    pub access: Option<NaiveDateTime>,
-    pub modify: Option<NaiveDateTime>,
-    pub viewed: Option<i32>,
-    pub rate: Option<i16>,
-    pub quality: Option<i16>,
-    pub accumtime: Option<i32>,
-    pub fpath: Option<String>,
-    pub hash: Option<String>,
-
+pub struct Sell {
+    pub id: Option<i32>,
+    pub item_id: i32,
+    pub tz: i64,
+    pub sold: Option<i32>
 }
 
 /*
