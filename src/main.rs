@@ -15,6 +15,7 @@ extern crate r2d2_diesel;
 #[macro_use] extern crate slog;
 extern crate slog_term;
 extern crate slog_json;
+extern crate chrono;
 
 pub mod schema;
 pub mod models;
@@ -23,6 +24,7 @@ mod api;
 pub mod meta;
 pub mod midware;
 pub mod theapp;
+pub mod keycap;
 
 use jsonrpc_core::*;
 use jsonrpc_http_server::{ServerBuilder, DomainsValidation, AccessControlAllowOrigin, RestApi, hyper};

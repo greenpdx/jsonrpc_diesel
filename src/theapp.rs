@@ -6,16 +6,22 @@ use dotenv::dotenv;
 use std::env;
 use std::sync::atomic::{self, AtomicUsize};
 use jsonrpc_core::*;
+use chrono::prelude::*;
 use jsonrpc_core::futures::Future;
 use meta::Meta;
 use std::time::Instant;
+use keycap::{capkey, Sales};
+use std::thread;
+use std::sync::mpsc;
+use std::sync::{Arc, RwLock, RwLockReadGuard};
 
 pub type DieselPool = r2d2::Pool<ConnectionManager<SqliteConnection>>;
 pub type DieselConnection = r2d2::PooledConnection<ConnectionManager<SqliteConnection>>;
 
 #[derive(Clone)]
 pub struct DieselMidWare {
-    pub pool: DieselPool
+    pub pool: DieselPool,
+    //data: Arc<RwLock<Sales>>
 }
 impl DieselMidWare {
 	pub fn new (logger: &Logger) -> DieselMidWare{
@@ -23,15 +29,28 @@ impl DieselMidWare {
         dotenv().ok();
 
 		let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+        let config = r2d2::Config::default();
+        let manager = ConnectionManager::<SqliteConnection>::new(database_url);
+        let pool = r2d2::Pool::new(config, manager).expect("Failed to create diesel pool.");
 
-		let config = r2d2::Config::default();
-		let manager = ConnectionManager::<SqliteConnection>::new(database_url);
-		let pool = r2d2::Pool::new(config, manager).expect("Failed to create diesel pool.");
+//        let sales = Sales::default();
+//        let mut tsales = Arc::new(RwLock::new(sales));
 
-		info!(logger, "Diesel pool created");
+        let (tx, _rx): (mpsc::Sender<u32>, mpsc::Receiver<u32>) = mpsc::channel();
+        let mut sale = pool.clone();
+        let _chld = thread::spawn(move || capkey(&sale,tx));
+
+			info!(logger, "Diesel pool created");
 
 		DieselMidWare {pool: pool}
 	}
+    pub fn sale (&mut self, key: u16) {
+        let ts = Local::now().timestamp();
+        println!("Sale {:?}", key)
+        //let mut f = &self.fil;
+        //write!(f, "{:?} {:?}", key, ts);
+    }
+
 //    pub fn get(&self) -> Option<DieselConnection> {
 //        let ref pool = self.pool;
 //        Some(pool.unwrap().get().unwrap())
