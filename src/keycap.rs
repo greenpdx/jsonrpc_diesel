@@ -13,6 +13,7 @@ use diesel::sqlite::SqliteConnection;
 use diesel::prelude::*;
 use r2d2;
 use r2d2_diesel::ConnectionManager;
+//use r2d2_sqlite::SqliteConnectionManager;
 
 use schema::*;
 

@@ -1,6 +1,8 @@
+
 use diesel::sqlite::SqliteConnection;
 use r2d2;
 use r2d2_diesel::ConnectionManager;
+//use r2d2_sqlite::SqliteConnectionManager;
 use slog::Logger;
 use dotenv::dotenv;
 use std::env;
@@ -24,15 +26,16 @@ pub struct DieselMidWare {
     //data: Arc<RwLock<Sales>>
 }
 impl DieselMidWare {
-	pub fn new (logger: &Logger) -> DieselMidWare{
+	pub fn new (logger: &Logger) -> DieselMidWare {
 		let logger = logger.new(o!("module" => "DieselMidWare"));
         dotenv().ok();
 
 		let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-        let config = r2d2::Config::default();
-        let manager = ConnectionManager::<SqliteConnection>::new(database_url);
-        let pool = r2d2::Pool::new(config, manager).expect("Failed to create diesel pool.");
-
+        //let config = r2d2::Config::default();
+        let manager = ConnectionManager::new(database_url);
+        //println!("{:?}", manager );
+        //let pool = r2d2::Pool::new(config, manager).expect("Failed to create diesel pool.");
+        let pool = r2d2::Pool::builder().build(manager).expect("No Pool");
 //        let sales = Sales::default();
 //        let mut tsales = Arc::new(RwLock::new(sales));
 

@@ -52,7 +52,7 @@ impl Middleware<Meta> for MyMiddleware {
         let logger = m.logger.unwrap().clone();
 		let start = Instant::now();
 		let request_number = self.0.fetch_add(1, atomic::Ordering::SeqCst);
-		//println!("Processing request {}: {:?}, {:?}", request_number, request, meta);
+		println!("Processing request {}: {:?}, {:?}", request_number, request, meta);
 
 		Box::new(next(request, meta).map(move |res| {
 

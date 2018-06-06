@@ -3,8 +3,10 @@
 extern crate jsonrpc_core;
 extern crate jsonrpc_http_server;
 #[macro_use] extern crate diesel;
-#[macro_use] extern crate diesel_codegen;
+//#[macro_use] extern crate diesel_codegen;
 // #[macro_use] extern crate diesel_infer_schema;
+//extern crate r2d2_sqlite;
+
 #[macro_use] extern crate serde_derive;
 #[macro_use] extern crate serde_json;
 extern crate serde;
