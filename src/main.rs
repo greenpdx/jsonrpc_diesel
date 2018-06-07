@@ -46,7 +46,7 @@ fn main() {
 
     let _server = ServerBuilder::new(io)
 //        .threads(3)
-        .rest_api(RestApi::Unsecure)
+        //.rest_api(RestApi::Unsecure)
         .meta_extractor( move |req: &hyper::Request| {
             let methd =req.method().clone();
             let uri = req.uri().clone();

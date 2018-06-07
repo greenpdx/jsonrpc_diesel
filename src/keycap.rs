@@ -13,9 +13,12 @@ use diesel::sqlite::SqliteConnection;
 use diesel::prelude::*;
 use r2d2;
 use r2d2_diesel::ConnectionManager;
+use diesel;
 //use r2d2_sqlite::SqliteConnectionManager;
-
+use models::*;
 use schema::*;
+use std::collections::HashMap;
+use std::char;
 
 //use midware::sold::{Sales};
 use theapp::DieselMidWare;
@@ -130,8 +133,9 @@ const local: bool = true;
 
 // read in key-item table
 // create hashmap
-pub fn capkey(pool: &r2d2::Pool<ConnectionManager<SqliteConnection>>, tx: mpsc::Sender<u32>) {
+pub fn capkey(pool: &r2d2::Pool<ConnectionManager<SqliteConnection>>, tx: mpsc::Sender<i32>) {
 //    let mut input = String::new();
+    use schema::sell::dsl::*;
     let mut buf0 = [0;16];
     let mut f0 = File::open("/dev/input/event0").expect("Can not open kbd");
     //let mut vbuf = Vec::new();
@@ -140,18 +144,31 @@ pub fn capkey(pool: &r2d2::Pool<ConnectionManager<SqliteConnection>>, tx: mpsc::
     println!("Run keycap!\n {:?}\n {:#X?}", f0, md);
     let conn = pool.get().unwrap();
 
+    let rslt: Vec<KeyMap> = diesel::sql_query("SELECT * FROM keymap")
+        .load(&*conn).expect("Bad get keymap");
+
+    let mut keyfind = HashMap::new();
+
+    for key in rslt {
+        let find = if true {key.key} else {key.code};
+        keyfind.insert(find, key.item_id);
+    };
+
+    println!("{:?}", &keyfind );
+//    Ok(Value::String(format!("{:?}", &r)))
+//    Ok(Value::String(r.to_string()))
 
     while !done {
-        println!("Start Loop");
         let _sz = f0.read(&mut buf0).expect("NO read KBD");
 //        let tim: u64 = unsafe {
 //            mem::transmute([buf0[5],buf0[4],buf0[7],buf0[6],buf0[1],buf0[0],buf0[3],buf0[2]])
 //        };
-        let mut ktype: u16 = 1;
-        let mut code: u16 = 0;
-        let mut val: u16 = 1;
+        println!("Start Loop {:?}", buf0);
+        let mut ktype: i16 = 1;
+        let mut code: i16 = 0;
+        let mut val: i16 = 1;
         {
-            val = buf0[0].into();
+            code = buf0[0].into();
         }
 /*
         {
@@ -168,15 +185,22 @@ pub fn capkey(pool: &r2d2::Pool<ConnectionManager<SqliteConnection>>, tx: mpsc::
         }
 */
         if ktype == 1 && val == 1 {
-            let key = xlat(code);
+            let itm_id = keyfind.get(&code).unwrap_or(&0);
             //let mut guard = sales.write().expect("wrlock failed");
             //let key = guard.sale(code);
             //let row = diesel::update(vidsinfo0.filter(id.eq(1)))
             //    .set(viewed.eq(intv))
             //    .get_result::<VidInfo>(&*conn);
+            if *itm_id == 0 {
+                continue;
+            }
+            let row = diesel::insert_into(sell).values((
+                item_id.eq(itm_id)))
+                .execute(&*conn);
 
-            println!("{:?} {:?}", code, key);
-            tx.send(code.into());
+
+            println!("C{:?} I{:?} V{:?}\n", code, itm_id, val);
+            tx.send(itm_id.clone());
         }
         //println!("{:?} {:?} {:#X?} {:#X?} {:#X?}",sz, tim/1000000, ktype, code, val);
     }

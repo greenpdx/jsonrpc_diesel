@@ -39,7 +39,7 @@ impl DieselMidWare {
 //        let sales = Sales::default();
 //        let mut tsales = Arc::new(RwLock::new(sales));
 
-        let (tx, _rx): (mpsc::Sender<u32>, mpsc::Receiver<u32>) = mpsc::channel();
+        let (tx, _rx): (mpsc::Sender<i32>, mpsc::Receiver<i32>) = mpsc::channel();
         let mut sale = pool.clone();
         let _chld = thread::spawn(move || capkey(&sale,tx));
 
