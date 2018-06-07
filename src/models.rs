@@ -26,14 +26,14 @@ pub struct Item {
     pub valid: i32
 }
 
-#[derive(Insertable,Serialize,Debug)]
+#[derive(Insertable,Serialize,Debug,PartialEq)]
 #[table_name="sell"]
 pub struct NewSell {
     pub item_id: i32,
     pub sold: Option<i32>
 }
 
-#[derive(Queryable,QueryableByName,Serialize, Debug)]
+#[derive(Queryable,QueryableByName,Serialize, Debug,PartialEq)]
 #[table_name="sell"]
 pub struct Sell {
     pub id: i32,
@@ -42,7 +42,7 @@ pub struct Sell {
     pub sold: Option<i32>
 }
 
-#[derive(Queryable,QueryableByName,Serialize, Debug)]
+#[derive(Queryable,QueryableByName,Serialize, Debug,PartialEq)]
 #[table_name="keymap"]
 pub struct KeyMap {
     pub id: i32,
