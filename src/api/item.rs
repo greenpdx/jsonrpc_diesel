@@ -75,9 +75,9 @@ pub fn methd_get_items(params: Params, meta: Meta) -> Result<Value> {
     //let rcnt: Vec<ItemCount> = setp.load(&*conn).expect("count bad");
     //println!("{:?}", rcnt );
 
-    let r = json!(rslt);
-
-    Ok(Value::String(r.to_string()))
+    let r = json!(rslt).to_string();
+    println!("GIS{:?}", &r );
+    Ok(Value::String(r))
 }
 
 pub fn methd_add_item(params: Params, meta: Meta) -> Result<Value> {

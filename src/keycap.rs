@@ -150,7 +150,7 @@ pub fn capkey(pool: &r2d2::Pool<ConnectionManager<SqliteConnection>>, tx: mpsc::
     let mut keyfind = HashMap::new();
 
     for key in rslt {
-        let find = if true {key.key} else {key.code};
+        let find = if false {key.key} else {key.code};
         keyfind.insert(find, key.item_id);
     };
 
@@ -160,37 +160,19 @@ pub fn capkey(pool: &r2d2::Pool<ConnectionManager<SqliteConnection>>, tx: mpsc::
 
     while !done {
         let _sz = f0.read(&mut buf0).expect("NO read KBD");
-//        let tim: u64 = unsafe {
-//            mem::transmute([buf0[5],buf0[4],buf0[7],buf0[6],buf0[1],buf0[0],buf0[3],buf0[2]])
-//        };
-        println!("Start Loop {:?}", buf0);
-        let mut ktype: i16 = 1;
-        let mut code: i16 = 0;
-        let mut val: i16 = 1;
-        {
-            code = buf0[0].into();
-        }
-/*
-        {
-            println!("KEY {:?} {:#X?}", _sz, buf0);
-            ktype: u16 = unsafe {
-                mem::transmute([buf0[8],buf0[9]])
-            };
-            code: u16 = unsafe {
-                mem::transmute([buf0[10],buf0[11]])
-            };
-            val: i32 = unsafe {
-                mem::transmute([buf0[12],buf0[13],buf0[14],buf0[15]])
-            };
-        }
-*/
+        let tim: u64 = unsafe {
+            mem::transmute([buf0[5],buf0[4],buf0[7],buf0[6],buf0[1],buf0[0],buf0[3],buf0[2]])
+        };
+//        let mut ktype: i16 = 1;
+//        let mut code: i16 = 0;
+//        let mut val: i16 = 1;
+        
+        let code: i16 = buf0[10].into();
+        let ktype: i16 = buf0[8].into();
+	let val: i16 = buf0[12].into();
+        println!("Start Loop {:?} {:?}", code, buf0);
         if ktype == 1 && val == 1 {
             let itm_id = keyfind.get(&code).unwrap_or(&0);
-            //let mut guard = sales.write().expect("wrlock failed");
-            //let key = guard.sale(code);
-            //let row = diesel::update(vidsinfo0.filter(id.eq(1)))
-            //    .set(viewed.eq(intv))
-            //    .get_result::<VidInfo>(&*conn);
             if *itm_id == 0 {
                 continue;
             }
